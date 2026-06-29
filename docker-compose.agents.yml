@@ -1,0 +1,60 @@
+name: docker-project-agents
+
+services:
+  workspace:
+    image: ${AGENT_IMAGE:-mcr.microsoft.com/devcontainers/base:ubuntu-24.04}
+    working_dir: /workspace
+    init: true
+    volumes:
+      - ${WORKSPACE_PATH:-.}:/workspace
+      - workspace-home:/home/vscode
+    environment:
+      TERM: xterm-256color
+    command: sleep infinity
+
+  agent-alpha:
+    image: ${AGENT_IMAGE:-mcr.microsoft.com/devcontainers/base:ubuntu-24.04}
+    working_dir: /workspace
+    init: true
+    profiles:
+      - agents
+    volumes:
+      - ${WORKSPACE_PATH:-.}:/workspace
+      - agent-alpha-home:/home/vscode
+    environment:
+      TERM: xterm-256color
+      AGENT_NAME: alpha
+    command: sleep infinity
+
+  agent-beta:
+    image: ${AGENT_IMAGE:-mcr.microsoft.com/devcontainers/base:ubuntu-24.04}
+    working_dir: /workspace
+    init: true
+    profiles:
+      - agents
+    volumes:
+      - ${WORKSPACE_PATH:-.}:/workspace
+      - agent-beta-home:/home/vscode
+    environment:
+      TERM: xterm-256color
+      AGENT_NAME: beta
+    command: sleep infinity
+
+  docker-agent:
+    image: docker:28.5.1-cli
+    working_dir: /workspace
+    init: true
+    profiles:
+      - docker
+    volumes:
+      - ${WORKSPACE_PATH:-.}:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      TERM: xterm-256color
+    command: sh -lc "docker version && tail -f /dev/null"
+
+volumes:
+  workspace-home:
+  agent-alpha-home:
+  agent-beta-home:
